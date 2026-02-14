@@ -1,6 +1,10 @@
 import os
+import re
 
 historyList = []
+
+class InvalidInputError(Exception):
+    pass
 
 class Math:
     @staticmethod
@@ -14,15 +18,19 @@ class Math:
 
 def readUserInput(message = "Enter: "):
     userInput = input(message)
+    if userInput == "" or userInput == None:
+      return None;
+    
     return userInput
 
-def getDevideOperations(operation = ""):
+def getOperationsArray(operation = ""):
     cleanOperation = operation.replace(" ","")
     return []
     
-def applyCalculate(calc = None):
+def applyCalculate(calc = ""):
     if calc == None:
-        return
+        return None;
+    operations = getOperationsArray(calc)
     
     result = ""
     historyList.append(f"{calc} = {result}")
@@ -31,20 +39,26 @@ def applyCalculate(calc = None):
 def clearConsole():
     os.system('cls' if os.name == 'nt' else 'clear')
     
-def printCalOptions():
-    print("Options: C (clean)   Esc (exit)    B (back to last operation)")
-    
-def printCalculator():
-    clearConsole()
+def printCalcHeader():
     print("====================== Console Calculator ==========================")
-    printCalOptions()
+    print("Options: C (clean)   Esc (exit)    B (back to last operation)")
     print("====================================================================")
     
-    for hc in historyList:
-        print(f" Cal: {hc}")
-    input = readUserInput("Type your operation: ")
-    applyCalculate(input)
-    printCalculator()
+def printCalculator():
+    try:
+        clearConsole()
+        
+        for hc in historyList:
+            print(f" Cal: {hc}")
+            
+        value = readUserInput("Type your operation: ")
+        applyCalculate(value)
+        printCalculator()
+        
+    except InvalidInputError as e:
+        print(f"{e}... Press a key to continue")
+        input()
+        printCalculator();
     
 def init():
     printCalculator();
