@@ -21,6 +21,10 @@ def readUserInput(message = "Enter: "):
     if userInput == "" or userInput == None:
       return None;
     
+    if re.search("[a-zA-Z]", userInput):
+        raise InvalidInputError("Invalid math value")
+    
+    mathValidRegularExpresion
     return userInput
 
 def getOperationsArray(operation = ""):
@@ -47,7 +51,7 @@ def printCalcHeader():
 def printCalculator():
     try:
         clearConsole()
-        
+        printCalcHeader()
         for hc in historyList:
             print(f" Cal: {hc}")
             
@@ -56,7 +60,7 @@ def printCalculator():
         printCalculator()
         
     except InvalidInputError as e:
-        print(f"{e}... Press a key to continue")
+        print(f"{e}... Press any key to continue")
         input()
         printCalculator();
     
