@@ -6,11 +6,13 @@ class InvalidInputError(Exception):
 
 def is_valid_expression(expr: str) -> bool:
     expr = expr.strip()
-    number = r'\d+(\.\d+)?'
+    number = r'\(?\d+(\.\d+)?\)?'    
     operator = r'[\+\-\*\/]'
-    pattern = rf'^\s*{number}(\s*{operator}\s*{number})*\s*$'
-    print(f"expr: {pattern}")
+    pattern = rf'^[\(\)]*{number}([\(\)]*{operator}[\(\)]*{number})*[\(\)]*$'
 
+    if not bool(re.match(r'^[0-9+\-*/().\s]+$', expr)):
+        return False
+    
     return bool(re.match(pattern, expr))
 
 def is_number(s: str)->bool:
@@ -28,32 +30,41 @@ def read_user_input(message: str)->str:
     return userInput
 
 #function to convert operation to Polish Notation.
-def get_rpn_list(operation: str)-> list:
+def get_rpn_list(operation: str) -> list:
     priority = {
-        "*": 3,
+        "*": 3, 
         "/": 3,
-        "+": 2,
-        "-": 2
+        "+": 2, 
+        "-": 2,
+        "(": 1 
     }
     cleanOperation = operation.strip()
     
     stackOperators = []
     output = []
-    pattern = r'\d+\.\d+|\d+|[+*/-]'
+    pattern = r'\d+\.\d+|\d+|[+*/()-]'
     
     for token in re.findall(pattern, cleanOperation):
-        if(is_number(token)):
-            output.insert(len(output), token)
-        else:
-            while stackOperators and priority[stackOperators[-1]] >= priority[token]:
+        if is_number(token):
+            output.append(token)
+        elif token == '(':
+            stackOperators.append(token)
+        elif token == ')':
+            while stackOperators and stackOperators[-1] != '(':
                 output.append(stackOperators.pop())
-            stackOperators.append(token); 
-
+            if stackOperators:
+                stackOperators.pop()
+        else:
+            while (stackOperators and 
+                   stackOperators[-1] != '(' and 
+                   priority[stackOperators[-1]] >= priority[token]):
+                output.append(stackOperators.pop())
+            stackOperators.append(token)
+                
     while stackOperators:
         output.append(stackOperators.pop())
            
     return output
-    
 def get_operation_result(calc: str, historyList: list)->float:
     if not calc:
         return None
