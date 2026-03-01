@@ -4,7 +4,16 @@ import re
 class InvalidInputError(Exception):
     pass
 
-def is_number(s: str):
+def is_valid_expression(expr: str) -> bool:
+    expr = expr.strip()
+    number = r'\d+(\.\d+)?'
+    operator = r'[\+\-\*\/]'
+    pattern = rf'^\s*{number}(\s*{operator}\s*{number})*\s*$'
+    print(f"expr: {pattern}")
+
+    return bool(re.match(pattern, expr))
+
+def is_number(s: str)->bool:
     try:
         float(s) 
         return True
@@ -13,12 +22,9 @@ def is_number(s: str):
 
 def read_user_input(message: str)->str:
     userInput = input(message)
+
     if not userInput:
       return None;
-    
-    if re.search("[a-zA-Z]", userInput):
-        raise InvalidInputError("Invalid math value")
-    
     return userInput
 
 #function to convert operation to Polish Notation.
@@ -29,7 +35,7 @@ def get_rpn_list(operation: str)-> list:
         "+": 2,
         "-": 2
     }
-    cleanOperation = operation.replace(" ","")
+    cleanOperation = operation.strip()
     
     stackOperators = []
     output = []
@@ -51,6 +57,9 @@ def get_rpn_list(operation: str)-> list:
 def get_operation_result(calc: str, historyList: list)->float:
     if not calc:
         return None
+    
+    if not is_valid_expression(calc):
+        raise InvalidInputError("Invalid math operation")
     
     ops = {
         "+": lambda a,b: a + b,
@@ -78,11 +87,9 @@ def get_operation_result(calc: str, historyList: list)->float:
 
 def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
-    
+
 def print_calc_options():
     print("====================== Console Calculator ==========================")
-    print("Options: C (clean)   Esc (exit)    B (back to last operation)")
-    print("====================================================================")
     
 def run_calculator(historyList:list):
     while True:
@@ -96,7 +103,7 @@ def run_calculator(historyList:list):
             get_operation_result(strOperation, historyList)
 
         except InvalidInputError as e:
-            print(f"{e}... Press any key to continue")
+            print(f"{e}... Press any enter to continue")
             input()
     
 def init():
